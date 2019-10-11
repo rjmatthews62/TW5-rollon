@@ -1,0 +1,274 @@
+created: 20191008114643771
+modified: 20191011053143916
+module-type: macro
+revision: 0
+title: $:/macros/rjmatthews/newroller.js
+type: application/javascript
+
+(function () {
+
+    /*jslint node: true, browser: true */
+    /*global $tw: false */
+    "use strict";
+
+    exports.name = "rollon";
+
+    exports.params = [
+        { name: "table" },
+        { name: "times", default: "1" }
+    ];
+
+    /*
+    Run the macro
+    */
+    exports.run = function (table, times) {
+        try {
+            var currentTiddler = this.getVariable("currentTiddler");
+            var source = $tw.wiki.getTiddler(currentTiddler);
+            var getresult = true;
+            if (source && !source.hasTag("rollonResult")) getresult = false;
+            if (getresult) {
+                if (!isNaN(times)) times=parseInt(times);
+                else times=parseInt(rollExpr(times));
+               if (times<1) times=1;
+                var t = $tw.wiki.getTiddler(table);
+                if (t) return rolltable(t, times);
+                else return rollExpr(table);
+            } else {
+                var button = "<$button>\r" +
+                    "<$action-createtiddler $basetitle=\"" + table + " Result\" $savetitle=\"!!newtitle\" tags=\"rollonResult\" text=\"<<rollon '" + table + "'>>\"/>\r" +
+                    "<$action-navigate $to={{!!newtitle}} />\r" +
+                    "Roll\r" +
+                    "</$button>";
+                return "Roll on [[" + table + "]] \r" + button;
+            }
+        } catch (err) {
+            return err.message;
+        }
+    };
+
+
+    var diceRE = /(\d+)[dD]([\d]+)([tT])?/g;
+
+    function rolltable(t, times) {
+        var listRE = /^(?:[\*#]|\d+\.?)([^\*#].+)$/gim;
+        var defRE = /^([:;])(.+)$/gim;
+        var rangeRE = /^(\d+)(?:-(\d+))?\s*/;
+        var text = t.fields.text;
+        var result;
+        var preamble;
+        var html = "";
+        var resultList = [];
+        var entries = [];
+        var low, high, range, rangeEntry, dieRoll, sizeOfRange, r;
+        var temp;
+        var force = false;
+        var sep = ",";
+        var dice = null;
+
+        low = high = range = rangeEntry = dieRoll = 0;
+
+        listRE.lastIndex = 0;
+        result = listRE.exec(text);
+        if (result) {
+            preamble = result.input.substring(0, result.index);
+            while (result !== null) {
+                entries.push(result[1]);
+                result = listRE.exec(text);
+            }
+            if (preamble) {
+                // don't wikify the preamble until you've dealt with the table, lest the preamble contain a rollon macro that will update
+                // the current tiddler's text when it completes
+                //html = wikifyStatic(preamble.trim(), null, tiddler);
+                html = preamble.trim();
+            }
+            for (i = 0; i < times; i++) {
+                if (!force) {
+                    if (!dice) {
+                        r = Math.floor(Math.random() * entries.length);
+                    } else {
+                        r = Math.min(rollExpr(dice), entries.length);
+                        r = r - 1; // entries starts at 0, even though dice start at 1
+                    }
+                } else {
+                    r = Math.min(force, entries.length);
+                }
+                //temp = wikifyStatic(entries[r], null, tiddler);
+                resultList.push(entries[r]);
+            }
+            html += resultList.join(sep);
+            html = html.replace(/<[\/]*span>/igm, '');
+        } else {
+            defRE.lastIndex = 0;
+            result = defRE.exec(text);
+            if (result) { // definition list
+                preamble = result.input.substring(0, result.index);
+                while (result !== null) {
+                    if (result[1] === ';') {
+                        // definition
+                        temp = result[2];
+                        rangeRE.lastIndex = 0;
+                        range = rangeRE.exec(temp);
+                        if (range) {
+                            low = range[1];
+                            high = null;
+                            if (result[2]) {
+                                high = range[2];
+                            }
+                            entries.push([low, high]);
+                        } else {
+                            html += "Definition doesn't seem to be a valid range: " + temp;
+                        }
+                    } else if (result[1] === ':') {
+                        // term, prior must have been a definition (we hope)
+                        // we should now have a series of triples: [low, high, term]
+                        entries[entries.length - 1].push(result[2]);
+                    }
+                    result = defRE.exec(text);
+                }
+                // find lowest range
+                temp = entries[0];
+                low = parseInt(temp[0]);
+                // find highest range
+                temp = entries[entries.length - 1];
+                if (temp[1]) {
+                    high = temp[1];
+                } else {
+                    high = temp[0];
+                }
+                sizeOfRange = high - low;
+                if (preamble) {
+                    html = wikifyStatic(preamble.trim(), null, tiddler);
+                }
+                for (var i = 0; i < times; i++) {
+                    if (!force) {
+                        // don't require tables to start with number 0
+                        r = Math.ceil(Math.random() * sizeOfRange);
+                    } else {
+                        r = Math.min(force, high);
+                    }
+                    r = r + low;
+                    // find the entry that r falls within
+                    rangeEntry = "Couldn't find range encompassing value " + r;
+                    for (var j = 0; j < entries.length; j++) {
+                        if (r < entries[j][0]) {
+                            // too high, not going to see anything with the proper range any more
+                            break;
+                        }
+                        rangeEntry = entries[j][2];
+                        if (entries[j][1] && r <= entries[j][1]) {
+                            break;
+                        }
+                    }
+                    resultList.push(rangeEntry);
+                }
+                html += resultList.join(sep);
+                html = html.replace(/<[\/]*span>/igm, '');
+            } else {
+                if (text.trim().length > 0) {
+                    for (i = 0; i < times; i++) {
+                        temp = text;
+                        resultList.push(temp);
+                    }
+                    html += resultList.join(sep);
+                    html = html.replace(/<[\/]*span>/igm, '');
+                } else {
+                    html = "Table " + t.title + " appears to be empty";
+                }
+            }
+        }
+        return tidyresult(html);
+    }
+
+    function tidyresult(html) {
+        return html.replace(/`/g, "'");
+
+    }
+
+    function substVariables(expr) {
+        var variableRE = /{([^}]+)}/g;
+        var text = "";
+        var t = null;
+        var replaceVariable = function (match, name) {
+            if (name.substr(0, 2) !== "*#") {
+                t = $tw.wiki.getTiddler(name);
+            } else {
+                // try to find a match
+                var varNameRE = new RegExp("#" + name.substr(2) + "$");
+                var variableTiddlers = $tw.wiki.filterTiddlers("[tag[rollonVar]]");
+                for (var i = 0; i < variableTiddlers.length; i++) {
+                    if (varNameRE.test(variableTiddlers[i].title)) {
+                        alert("Found match=" + variableTiddlers[i].title);
+                        t = variableTiddlers[i];
+                        break;
+                    }
+                }
+            }
+            if (t) {
+                text = t.fields.text;
+            }
+            return text;
+        };
+        expr = expr.replace(variableRE, replaceVariable);
+        return expr;
+    }
+
+    function rollExpr(expr) {
+        if (!isNaN(expr)) expr="1d"+expr;
+        expr = substVariables(expr);
+        diceRE.lastIndex = 0;
+        var match = diceRE.exec(expr);
+        var diceExpr, result;
+        if (match && match[3]) {
+            diceRE.lastIndex = 0;
+            diceExpr = expr.replace(diceRE, "rollSpecial($1, $2, '$3')");
+        } else {
+            diceRE.lastIndex = 0;
+            diceExpr = expr.replace(diceRE, "roll($1, $2)");
+        }
+        result = 0;
+        result = eval(diceExpr);
+        return result;
+    }
+
+    function roll(dice, sides) {
+        var result = 0, i = 0;
+        for (i = 0; i < dice; i++) {
+            result += Math.ceil(Math.random() * sides);
+        }
+        return result;
+    }
+
+    function rollSpecial(dice, sides, option) {
+        var result = 0;
+        if (option.toLowerCase() === 't') {
+            return rollTT(dice, sides);
+        }
+        return result;
+    }
+
+    function rollTT(dice, sides) {
+        // Tunnels & Trolls: doubles or triples add and roll over
+        var result = 0, die = 0, i = 0;
+        var allSame = true;
+        var previous;
+        if (dice === 2 || dice === 3) {
+            while (allSame === true) {
+                previous = 0;
+                for (i = 0; i < dice; i++) {
+                    die = Math.ceil(Math.random() * sides);
+                    result += die;
+                    if (die !== previous && previous !== 0) {
+                        allSame = false;
+                    }
+                    previous = die;
+                }
+            }
+        } else {
+            return roll(dice, sides);
+        }
+        return result;
+    }
+
+
+})();
