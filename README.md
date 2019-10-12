@@ -36,3 +36,8 @@ If the Tiddler has any postscript material after the end of the last list in the
 
 Lists don't actually have to be contiguous.  That is, since rollon is using a textual search, it will consider two lists in the same Tiddler as being the same as one.  That's probably a bug, but doesn't seem worth eliminating.  I wouldn't advise counting on that behavior to continue in future versions of Rollon Plugin.
 
+### Behaviour ###
+* If tiddler is tagged with **rollonResult**, then then result will be rendered on that page. To reroll, hit "edit" then "save" tiddler.
+* If tidder is **not** tagged with **rollonResult** it will render a button. When clicked, the button will create a new tiddler tagged with **rollonResult** and render that.
+* Tables can have further **<<rollon** macros embedded which will be expanded. This can allow for quite complex tables. Take care not to create an infinite loop.
+
