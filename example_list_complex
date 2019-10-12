@@ -1,0 +1,12 @@
+;1-2
+: Flightless bird
+;3-4
+: Emu
+;5-6
+: Poisonous frog
+;7-13
+: Poisonous toad
+;14-21
+: Crab
+
+In this example, rollon will generate a random number between 1 and 21, and select the related line from the matching range.
