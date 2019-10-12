@@ -28,8 +28,8 @@ Parameters may be surrounded by quotes if they are to contain spaces, e.g. table
 Tables are any Tiddler that contains:
 * an unordered list (introduced with _*_
 * an ordered list (introduced with _#_
-* a definition list (introduced with _;_ on the term line and _:_ on the definition line.  Be careful that you alternate definitions and terms... you can tell if it's right by whether the terms are bold and the definitions below and indented)
-* a sequence of lines beginning with numbers (and optionally having a _._ after the number)
+* a definition list (introduced with __;__ on the term line and __:__ on the definition line.  Be careful that you alternate definitions and terms... you can tell if it's right by whether the terms are bold and the definitions below and indented)
+* a sequence of lines beginning with numbers (and optionally having a __.__ after the number)
 
 If the Tiddler has any prefatory material prior to the start of the first list in the Tiddler, that text is copied into the result.
 If the Tiddler has any postscript material after the end of the last list in the Tiddler, that text is ignored.  This is useful for notes and annotations.
