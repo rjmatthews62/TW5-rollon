@@ -9,7 +9,12 @@ type: application/javascript
 /*\
 
 Robbie Merge Widget
-
+This does some very specific merging of multiple lines into one.
+* Each line is separated by ':' into indivual fields.
+* The second field is assumed to have a bunch of numbers, which are added together numerically.
+* All other fields are string concatenated.
+This is not expected to be useful to anyone but the person I wrote it for, but the techniques used to convert the children
+elements into a string array may be helpful.
 \*/
 (function () {
 
@@ -38,7 +43,7 @@ Robbie Merge Widget
         this.parentDomNode = parent;
         info = "";
         var lines = [];
-        for (var i = 0; i < children.length; i++) {
+        for (var i = 0; i < children.length; i++) {  // This code puts all the text into a string array
             var child = children[i];
             if (child.type === "macrocall") {
                 if (info.trim() !== "") lines.push(info);
@@ -47,9 +52,9 @@ Robbie Merge Widget
             } else if (child.type === "text") {
                 info += child.text;
             }
-        }
+        } 
         if (info.trim() !== "") lines.push(info);
-        var result = mergelines(lines).join(": ");
+        var result = mergelines(lines).join(": ");  // This code calls merge function. 
         this.myAddNode(this.document.createTextNode(result));
         this.myAddNode(this.document.createElement("br"));
     };
@@ -59,7 +64,8 @@ Robbie Merge Widget
         this.domNodes.push(node);
     };
 
-    function recurseMacro(widget, macroname, params) {
+    // This will call and parse any macros. I'm not totally convinced it needs to be recursive.
+    function recurseMacro(widget, macroname, params) {  
         var result = "";
         var tmp = widget.evaluateMacroModule(macroname, params, "Not found");
         var parsed = widget.wiki.parseText("text/vnd.tiddlywiki", tmp);
