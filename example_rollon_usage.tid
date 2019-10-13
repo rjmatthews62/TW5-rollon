@@ -1,5 +1,5 @@
 created: 20191013084955425
-modified: 20191013085316071
+modified: 20191013085650254
 tags: rollonResult
 title: example_rollon_usage
 
@@ -21,3 +21,25 @@ D&D Character:
 |Int|<<rollon 3d6>>|
 |Wis|<<rollon 3d6>>|
 |Cha|<<rollon 3d6>>|
+
+
+
+```
+Simple List:
+
+<<rollon example_list_simple>>
+
+Complex:
+
+<<rollon  example_list_complex>>
+
+D&D Character:
+
+|Str|<<rollon 3d6>>|
+|Dex|<<rollon 3d6>>|
+|Con|<<rollon 3d6>>|
+|Int|<<rollon 3d6>>|
+|Wis|<<rollon 3d6>>|
+|Cha|<<rollon 3d6>>|
+
+```
