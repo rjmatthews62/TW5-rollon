@@ -21,8 +21,10 @@ I found the TW5 documentation on plugins, widgets and macros hard to navigate, b
 Usage **<<rollon tablename|table:string|dice_expression [times|times:number or dice_expression] >>**
 
 ### Parameters ###
-Parameters may be surrounded by quotes if they are to contain spaces, e.g. table:"My Table"  Any parameter except table may be passed *table - the name of the table to roll on, or a dice expression like 3d6+1.  Required
-*times - the number of times to roll, or a dice expression.  Defaults to 1.  Prompt will prompt for a number or dice expression when you click
+Parameters may be surrounded by quotes if they are to contain spaces, e.g. table:"My Table" 
+
+* table - the name of the table to roll on, or a dice expression like 3d6+1.  Required
+* times - the number of times to roll, or a dice expression.  Defaults to 1.
 
 ### Tables ###
 Tables are any Tiddler that contains:
