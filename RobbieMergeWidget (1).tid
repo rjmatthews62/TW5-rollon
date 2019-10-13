@@ -1,0 +1,141 @@
+created: 20191010223042719
+modified: 20191013051501217
+module-type: widget
+revision: 0
+tags: 
+title: RobbieMergeWidget
+type: application/javascript
+
+/*\
+
+Robbie Merge Widget
+
+\*/
+(function () {
+
+    /*jslint node: true, browser: true */
+    /* eslint eqeqeq:"off" */
+    /*global $tw: false */
+    "use strict";
+
+    var Widget = require("$:/core/modules/widgets/widget.js").widget;
+
+    var MyWidget = function (parseTreeNode, options) {
+        this.initialise(parseTreeNode, options);
+    };
+
+    /*
+    Inherit from the base widget class
+    */
+    MyWidget.prototype = new Widget();
+
+    /*
+    Render this widget into the DOM
+    */
+    MyWidget.prototype.render = function (parent, nextSibling) {
+        var info = "Hello World!";
+        var children = this.parseTreeNode.children;
+        this.parentDomNode = parent;
+        info = "";
+        var lines = [];
+        for (var i = 0; i < children.length; i++) {
+            var child = children[i];
+            if (child.type === "macrocall") {
+                if (info.trim() !== "") lines.push(info);
+                info = "";
+                lines.push(recurseMacro(this, child.name, child.params));
+            } else if (child.type === "text") {
+                info += child.text;
+            }
+        }
+        if (info.trim() !== "") lines.push(info);
+        var result = mergelines(lines).join(": ");
+        this.myAddNode(this.document.createTextNode(result));
+        this.myAddNode(this.document.createElement("br"));
+    };
+
+    MyWidget.prototype.myAddNode = function (node, nextSibling) {
+        this.parentDomNode.insertBefore(node, nextSibling);
+        this.domNodes.push(node);
+    };
+
+    function recurseMacro(widget, macroname, params) {
+        var result = "";
+        var tmp = widget.evaluateMacroModule(macroname, params, "Not found");
+        var parsed = widget.wiki.parseText("text/vnd.tiddlywiki", tmp);
+        var tree = parsed.tree;
+        result = doParseTree(widget, tree);
+        return result;
+    }
+
+    function doParseTree(widget, tree) {
+        var result = "";
+        for (var i = 0; i < tree.length; i++) {
+            var child = tree[i];
+            if (child.type === "macrocall") result += recurseMacro(widget, child.name, child.params);
+            else if (child.type === "text") result += child.text;
+            if (child.children) result += doParseTree(widget, child.children);
+        }
+        return result;
+    }
+
+    function mergelines(lines) {
+        var work = [];
+        var s, temp;
+        for (var i = 0; i < lines.length; i++) {
+            s = lines[i];
+            if (s.trim() == "") continue;
+            if (s.startsWith("+") || s.startsWith("-")) s = ":" + s;
+            temp = s.split(":");
+            for (var j = 0; j < temp.length; j++) {
+                if (i == 0) {
+                    work[j] = temp[j];
+                } else {
+                    if (j == 1) work[j] = addfields(work[j], temp[j]);
+                    else work[j] += " " + temp[j];
+                }
+            }
+        }
+        return work;
+    }
+
+    function dehtml(html) {
+        var result = html.replace(/<br>/igm, "\n");
+        result = detag(result, "span", "");
+        result = detag(result, "strong", "''");
+        temp = temp.replace(/\™/g, " ");
+        result = temp.replace(/℠/g, " ");
+        result = detag(result, "hr", "----");
+        return result;
+    }
+
+    function detag(html, tag, rep) {
+        var openRE = new RegExp("<" + tag + ">", "igm");
+        var closeRE = new RegExp("<\/" + tag + ">", "igm");
+        if (rep == null) rep = "";
+        return html.replace(openRE, rep).replace(closeRE, rep);
+    }
+
+    function addfields(fields1, fields2) {
+        var f1 = fields1.split(/[\/ ]/igm);
+        var f2 = fields2.split(/[\/ ]/igm);
+        var seps = fields1.match(/[\/ ]/igm);
+        var result = "";
+        for (var i = 0; i < Math.max(f1.length, f2.length); i++) {
+            result += tonumber(f1[i]) + tonumber(f2[i]);
+            if (i < seps.length) result += seps[i];
+        }
+        return result;
+    }
+
+    function tonumber(value) {
+        if (isNaN(value) || value == null) return 0;
+        value = value.trim();
+        if (value == "") return 0;
+        if (value.substr(0, 1) == "+") value = value.substr(1);
+        return Number(value);
+    }
+
+    exports.robbiemerge = MyWidget;
+
+})();
