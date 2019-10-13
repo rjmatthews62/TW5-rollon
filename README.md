@@ -41,3 +41,14 @@ Lists don't actually have to be contiguous.  That is, since rollon is using a te
 * If tidder is **not** tagged with **rollonResult** it will render a button. When clicked, the button will create a new tiddler tagged with **rollonResult** and render that.
 * Tables can have further **<<rollon** macros embedded which will be expanded. This can allow for quite complex tables. Take care not to create an infinite loop.
 
+### RobbieMergewidget ###
+This was written for a very specific purpose. The idea is to take a number of seperate rollon results and merge them.
+Usage:
+
+```
+<$robbiemerge>
+<<rollon Sometable>>
+<<rollon AnotherTable>>
+<$/robbiemerge>
+```
+This will parse the rollon macros, then merge the result into a single line. This exact usage probably won't be meaningful to anyone else in the world, but the techniques used to parse the child nodes into a string array may be useful.
