@@ -41,7 +41,7 @@ Lists don't actually have to be contiguous.  That is, since rollon is using a te
 ### Behaviour ###
 * If tiddler is tagged with **rollonResult**, then then result will be rendered on that page. To reroll, hit "edit" then "save" tiddler.
 * If tidder is **not** tagged with **rollonResult** it will render a button. When clicked, the button will create a new tiddler tagged with **rollonResult** and render that.
-* Tables can have further **<<rollon** macros embedded which will be expanded. This can allow for quite complex tables. Take care not to create an infinite loop.
+* Tables can have further `<<rollon>>` macros embedded which will be expanded. This can allow for quite complex tables. Take care not to create an infinite loop.
 
 ### RobbieMergewidget ###
 This was written for a very specific purpose. The idea is to take a number of seperate rollon results and merge them.
