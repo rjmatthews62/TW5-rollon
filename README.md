@@ -58,12 +58,12 @@ Usage:
 This will parse the rollon macros, then merge the result into a single line. This exact usage probably won't be meaningful to anyone else in the world, but the techniques used to parse the child nodes into a string array may be useful.
 
 ## expander macro ##
-The expander macro ''expander_plugin.tid'' will take text or a tiddler and recursively expand all macros ("<<" ">>" syntax only) but otherwise should return text unaltered.
+The expander macro **expander_plugin.tid** will take text or a tiddler and recursively expand all macros ("<<" ">>" syntax only) but otherwise should return text unaltered.
 
 This should simplify such tasks as using a template with macros to populate a new page.
 ### Parameters: ###
-* ''text'' - text to expand.
-* ''tiddler'' - tiddler to load and expand.
+* **text** - text to expand.
+* **tiddler** - tiddler to load and expand.
 
 ### Example ###
 ```
