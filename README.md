@@ -45,7 +45,7 @@ Lists don't actually have to be contiguous.  That is, since rollon is using a te
 * Tables can have further `<<rollon>>` macros embedded which will be expanded. This can allow for quite complex tables. Take care not to create an infinite loop.
 
 
-### RobbieMergewidget ###
+## RobbieMergewidget ##
 This was written for a very specific purpose. The idea is to take a number of seperate rollon results and merge them.
 Usage:
 
@@ -56,3 +56,15 @@ Usage:
 <$/robbiemerge>
 ```
 This will parse the rollon macros, then merge the result into a single line. This exact usage probably won't be meaningful to anyone else in the world, but the techniques used to parse the child nodes into a string array may be useful.
+
+## expander macro ##
+The expander macro ''expander_plugin.tid'' will take text or a tiddler and recursively expand all macros ("<<" ">>" syntax only) but otherwise should return text unaltered.
+
+This should simplify such tasks as using a template with macros to populate a new page.
+
+### Example ###
+```
+<$button actions='<$action-sendmessage $message="tm-new-tiddler" title="New Batcave Tiddler Ex" text=<<expander tiddler:Batcave>> tags="rollonResult"/>'>
+New Roll on Batcave Ex
+</$button>
+```
