@@ -61,6 +61,9 @@ This will parse the rollon macros, then merge the result into a single line. Thi
 The expander macro ''expander_plugin.tid'' will take text or a tiddler and recursively expand all macros ("<<" ">>" syntax only) but otherwise should return text unaltered.
 
 This should simplify such tasks as using a template with macros to populate a new page.
+### Parameters:###
+* ''text'' - text to expand.
+* ''tiddler'' - tiddler to load and expand.
 
 ### Example ###
 ```
