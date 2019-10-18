@@ -1,0 +1,70 @@
+created: 20191018004558390
+modified: 20191018014841400
+module-type: macro
+revision: 5
+tags: 
+title: $:/macros/rjmatthews/expander.js
+type: application/javascript
+
+(function () {
+
+    /*jslint node: true, browser: true */
+    /*global $tw: false */
+    "use strict";
+
+    exports.name = "expander";
+
+    exports.params = [
+        { name: "text", default: "" },
+        { name: "tiddler"}
+    ];
+
+    /*
+    Run the macro
+    */
+    exports.run = function (text,tiddler) {
+        try {
+            var result = "";
+            if (tiddler) {
+                var source = this.wiki.getTiddler(tiddler);
+                if (source) text += source.fields.text;
+            }
+            var i = text.indexOf("<<");
+            while (i >= 0) {
+                result += text.slice(0, i);
+                text = text.slice(i);
+                var j = text.indexOf(">>");
+                var macro = text.slice(0, j + 2);
+                text = text.slice(j + 2);
+                var parsed = this.wiki.parseText("text/vnd.tiddlywiki", macro);
+                result += doParseTree(this,parsed.tree);
+                i = text.indexOf("<<");
+            }
+            result += text;
+            return result;
+        } catch (err) {
+            return err.message;
+        }
+    };
+
+    // This will call and parse any macros. I'm not totally convinced it needs to be recursive.
+    function recurseMacro(widget, macroname, params) {
+        var result = "";
+        var tmp = widget.evaluateMacroModule(macroname, params, "Not found");
+        var parsed = widget.wiki.parseText("text/vnd.tiddlywiki", tmp);
+        var tree = parsed.tree;
+        result = doParseTree(widget, tree);
+        return result;
+    }
+
+    function doParseTree(widget, tree) {
+        var result = "";
+        for (var i = 0; i < tree.length; i++) {
+            var child = tree[i];
+            if (child.type === "macrocall") result += recurseMacro(widget, child.name, child.params);
+            else if (child.type === "text") result += child.text;
+            if (child.children) result += doParseTree(widget, child.children);
+        }
+        return result;
+    }
+}) ();
